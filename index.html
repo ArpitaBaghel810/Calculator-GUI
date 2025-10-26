@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -62,7 +61,7 @@
             max-width: 360px;
             backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow:
+            box-shadow: 
                 0 20px 40px rgba(0, 0, 0, 0.6),
                 0 8px 16px rgba(0, 0, 0, 0.4),
                 inset 0 1px 0 rgba(255, 255, 255, 0.05);
@@ -183,13 +182,11 @@
             transform: scale(0.92);
         }
 
-        .button.operator,
-        .button.equals {
+        .button.operator, .button.equals {
             box-shadow: 0 4px 15px rgba(0, 114, 255, 0.3);
         }
 
-        .button.operator:hover,
-        .button.equals:hover {
+        .button.operator:hover, .button.equals:hover {
             box-shadow: 0 6px 20px rgba(0, 114, 255, 0.4);
         }
 
@@ -203,9 +200,7 @@
             pointer-events: none;
         }
 
-        .container,
-        .calculator,
-        .button {
+        .container, .calculator, .button {
             pointer-events: auto;
         }
 
@@ -216,35 +211,32 @@
             text-align: center;
         }
 
-        
-
         @media (max-width: 480px) {
             .container {
                 padding: 10px;
                 max-width: 100%;
             }
-
+            
             .calculator {
                 padding: 20px 15px;
                 border-radius: 20px;
                 max-width: 340px;
             }
-
+            
             .display {
                 padding: 20px 15px 20px 15px;
                 min-height: 100px;
             }
-
+            
             .current-operand {
                 font-size: 42px;
             }
-
+            
             .button {
                 height: 65px;
                 width: 65px;
                 font-size: 22px;
             }
-
         }
 
         @media (max-width: 320px) {
@@ -253,23 +245,22 @@
                 width: 60px;
                 font-size: 20px;
             }
-
+            
             .current-operand {
                 font-size: 36px;
             }
         }
     </style>
 </head>
-
 <body>
     <div id="canvas-container"></div>
-
+    
     <div class="container">
         <header class="header">
             <h1>Android-Style Calculator</h1>
             <p class="subtitle">Built with HTML | CSS | JS <br> ~By Arpita Baghel(RA2411030030048)</p>
         </header>
-
+        
         <div class="calculator">
             <div class="display">
                 <div class="previous-operand" id="previous-operand"></div>
@@ -280,30 +271,28 @@
                 <button class="button function" data-action="delete">⌫</button>
                 <button class="button function" data-action="percent">%</button>
                 <button class="button operator" data-action="divide">÷</button>
-
+                
                 <button class="button number" data-number="7">7</button>
                 <button class="button number" data-number="8">8</button>
                 <button class="button number" data-number="9">9</button>
                 <button class="button operator" data-action="multiply">×</button>
-
+                
                 <button class="button number" data-number="4">4</button>
                 <button class="button number" data-number="5">5</button>
                 <button class="button number" data-number="6">6</button>
                 <button class="button operator" data-action="subtract">−</button>
-
+                
                 <button class="button number" data-number="1">1</button>
                 <button class="button number" data-number="2">2</button>
                 <button class="button number" data-number="3">3</button>
                 <button class="button operator" data-action="add">+</button>
-
+                
                 <button class="button function" data-action="toggle-sign">+/-</button>
-                <button class="button number zero" data-number="0">0</button>
+                <button class="button number" data-number="0">0</button>
                 <button class="button number" data-action="decimal">.</button>
                 <button class="button equals" data-action="equals">=</button>
             </div>
         </div>
-
-        
     </div>
 
     <script>
@@ -312,7 +301,7 @@
             constructor() {
                 try {
                     console.log('Initializing Math Graph visualization...');
-
+                    
                     if (typeof THREE === 'undefined') {
                         console.error('Three.js not loaded!');
                         return;
@@ -320,23 +309,23 @@
 
                     this.scene = new THREE.Scene();
                     this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-                    this.renderer = new THREE.WebGLRenderer({
-                        alpha: true,
+                    this.renderer = new THREE.WebGLRenderer({ 
+                        alpha: true, 
                         antialias: true,
                         powerPreference: "high-performance"
                     });
-
+                    
                     this.graph = null;
                     this.time = 0;
                     this.mouseX = 0;
                     this.mouseY = 0;
                     this.currentFunction = 'sin';
-
+                    
                     this.init();
                     this.createGraph();
                     this.animate();
                     this.handleMouseMove();
-
+                    
                     console.log('Math Graph initialized successfully');
                 } catch (error) {
                     console.error('Error initializing Math Graph:', error);
@@ -354,14 +343,14 @@
                 this.renderer.setClearColor(0x000000, 0);
                 this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
                 canvasContainer.appendChild(this.renderer.domElement);
-
+                
                 this.camera.position.z = 15;
                 this.scene.fog = new THREE.Fog(0x000000, 15, 50);
-
+                
                 // Add ambient light
                 const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
                 this.scene.add(ambientLight);
-
+                
                 // Add directional light
                 const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
                 directionalLight.position.set(1, 1, 1);
@@ -372,125 +361,125 @@
                 const geometry = new THREE.BufferGeometry();
                 const vertices = [];
                 const colors = [];
-
+                
                 const gridSize = 20;
                 const step = 0.2;
-
+                
                 // Create grid lines
                 for (let i = -gridSize; i <= gridSize; i++) {
                     // X-axis lines
                     vertices.push(-gridSize, 0, i);
                     vertices.push(gridSize, 0, i);
-
+                    
                     // Z-axis lines
                     vertices.push(i, 0, -gridSize);
                     vertices.push(i, 0, gridSize);
-
+                    
                     // Colors for grid lines
                     const alpha = 0.1;
                     for (let j = 0; j < 4; j++) {
                         colors.push(0.2, 0.4, 0.8, alpha);
                     }
                 }
-
+                
                 // Create function graph
                 const functionVertices = [];
                 const functionColors = [];
-
+                
                 for (let x = -gridSize; x <= gridSize; x += step) {
                     for (let z = -gridSize; z <= gridSize; z += step) {
                         const y = this.calculateFunction(x, z);
-
+                        
                         functionVertices.push(x, y, z);
-
+                        
                         // Color based on height and position
                         const r = 0.2 + Math.abs(x) / gridSize * 0.8;
                         const g = 0.4 + Math.abs(z) / gridSize * 0.6;
                         const b = 0.8 + Math.abs(y) / 5 * 0.2;
-
+                        
                         functionColors.push(r, g, b);
                     }
                 }
-
+                
                 // Add grid to scene
                 const gridGeometry = new THREE.BufferGeometry();
                 gridGeometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
                 gridGeometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-
-                const gridMaterial = new THREE.LineBasicMaterial({
+                
+                const gridMaterial = new THREE.LineBasicMaterial({ 
                     vertexColors: true,
                     transparent: true,
                     opacity: 0.3
                 });
-
+                
                 const grid = new THREE.LineSegments(gridGeometry, gridMaterial);
                 this.scene.add(grid);
-
+                
                 // Add function graph to scene
                 const functionGeometry = new THREE.BufferGeometry();
                 functionGeometry.setAttribute('position', new THREE.Float32BufferAttribute(functionVertices, 3));
                 functionGeometry.setAttribute('color', new THREE.Float32BufferAttribute(functionColors, 3));
-
+                
                 const functionMaterial = new THREE.PointsMaterial({
                     size: 0.1,
                     vertexColors: true,
                     transparent: true,
                     opacity: 0.8
                 });
-
+                
                 this.graph = new THREE.Points(functionGeometry, functionMaterial);
                 this.scene.add(this.graph);
             }
-
+            
             calculateFunction(x, z) {
                 const timeFactor = this.time * 0.5;
-
-                switch (this.currentFunction) {
+                
+                switch(this.currentFunction) {
                     case 'sin':
-                        return Math.sin(Math.sqrt(x * x + z * z) + timeFactor) * 2;
+                        return Math.sin(Math.sqrt(x*x + z*z) + timeFactor) * 2;
                     case 'cos':
-                        return Math.cos(Math.sqrt(x * x + z * z) + timeFactor) * 2;
+                        return Math.cos(Math.sqrt(x*x + z*z) + timeFactor) * 2;
                     case 'wave':
                         return Math.sin(x + timeFactor) * Math.cos(z + timeFactor) * 2;
                     case 'ripple':
-                        const distance = Math.sqrt(x * x + z * z);
+                        const distance = Math.sqrt(x*x + z*z);
                         return Math.sin(distance * 2 - timeFactor * 3) / (distance + 1) * 4;
                     default:
-                        return Math.sin(Math.sqrt(x * x + z * z) + timeFactor) * 2;
+                        return Math.sin(Math.sqrt(x*x + z*z) + timeFactor) * 2;
                 }
             }
-
+            
             updateGraph() {
                 if (!this.graph) return;
-
+                
                 const positions = this.graph.geometry.attributes.position.array;
                 const colors = this.graph.geometry.attributes.color.array;
-
+                
                 const gridSize = 20;
                 const step = 0.2;
                 let index = 0;
-
+                
                 for (let x = -gridSize; x <= gridSize; x += step) {
                     for (let z = -gridSize; z <= gridSize; z += step) {
                         const y = this.calculateFunction(x, z);
-
+                        
                         positions[index * 3] = x;
                         positions[index * 3 + 1] = y;
                         positions[index * 3 + 2] = z;
-
+                        
                         // Update colors based on new positions
                         const r = 0.2 + Math.abs(x) / gridSize * 0.8;
                         const g = 0.4 + Math.abs(z) / gridSize * 0.6;
                         const b = 0.8 + Math.abs(y) / 5 * 0.2;
-
+                        
                         colors[index * 3] = r;
                         colors[index * 3 + 1] = g;
                         colors[index * 3 + 2] = b;
-
+                        
                         index++;
                     }
                 }
-
+                
                 this.graph.geometry.attributes.position.needsUpdate = true;
                 this.graph.geometry.attributes.color.needsUpdate = true;
             }
@@ -512,19 +501,19 @@
 
             animate() {
                 if (!this.renderer) return;
-
+                
                 requestAnimationFrame(() => this.animate());
-
+                
                 this.time += 0.016; // ~60fps
-
+                
                 // Update graph based on current function
                 this.updateGraph();
-
+                
                 // Rotate graph slowly
                 if (this.graph) {
                     this.graph.rotation.y = this.time * 0.05;
                 }
-
+                
                 // Camera follows mouse slightly
                 this.camera.position.x += (this.mouseX * 2 - this.camera.position.x) * 0.02;
                 this.camera.position.y += (this.mouseY * 2 - this.camera.position.y) * 0.02;
@@ -538,7 +527,7 @@
                 this.camera.updateProjectionMatrix();
                 this.renderer.setSize(window.innerWidth, window.innerHeight);
             }
-
+            
             changeFunction(func) {
                 this.currentFunction = func;
             }
@@ -583,13 +572,13 @@
 
             chooseOperation(operation) {
                 if (this.currentOperand === '') return;
-
+                
                 if (this.previousOperand !== '') {
                     this.previousOperand += ` ${this.currentOperand} ${this.getOperationSymbol(operation)}`;
                 } else {
                     this.previousOperand = `${this.currentOperand} ${this.getOperationSymbol(operation)}`;
                 }
-
+                
                 this.operation = operation;
                 this.currentOperand = '';
                 this.updateDisplay();
@@ -611,15 +600,15 @@
                     if (this.currentOperand !== '') {
                         expression += ` ${this.currentOperand}`;
                     }
-
+                    
                     if (!expression) return;
-
+                    
                     expression = expression.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-');
-
+                    
                     const result = Function('"use strict";return (' + expression + ')')();
-
+                    
                     const displayExpression = this.previousOperand + (this.currentOperand !== '' ? ` ${this.currentOperand}` : '');
-
+                    
                     this.currentOperand = result.toString();
                     this.previousOperand = displayExpression;
                     this.shouldResetScreen = true;
@@ -657,13 +646,13 @@
                 const integerDigits = parseFloat(stringNumber.split('.')[0]);
                 const decimalDigits = stringNumber.split('.')[1];
                 let integerDisplay;
-
+                
                 if (isNaN(integerDigits)) {
                     integerDisplay = '';
                 } else {
                     integerDisplay = integerDigits.toLocaleString('en', { maximumFractionDigits: 0 });
                 }
-
+                
                 if (decimalDigits != null) {
                     return `${integerDisplay}.${decimalDigits}`;
                 } else {
@@ -674,7 +663,7 @@
             updateDisplay() {
                 this.currentOperandElement.innerText = this.formatDisplayNumber(this.currentOperand);
                 this.previousOperandElement.innerText = this.previousOperand;
-
+                
                 const clearButton = document.querySelector('[data-action="clear"]');
                 if (clearButton) {
                     clearButton.textContent = this.clearButtonText;
@@ -712,7 +701,7 @@
         // Main Application
         document.addEventListener('DOMContentLoaded', () => {
             console.log('DOM loaded - initializing app');
-
+            
             // Initialize Math Graph
             const mathGraph = new MathGraph();
             window.addEventListener('resize', () => {
@@ -722,18 +711,18 @@
             // Initialize calculator
             const previousOperandElement = document.getElementById('previous-operand');
             const currentOperandElement = document.getElementById('current-operand');
-
+            
             if (!previousOperandElement || !currentOperandElement) {
                 console.error('Calculator elements not found!');
                 return;
             }
-
+            
             const calculator = new Calculator(previousOperandElement, currentOperandElement);
 
-            // Button event listeners
+            // Button event listeners - FIXED VERSION
             function setupEventListeners() {
                 console.log('Setting up event listeners');
-
+                
                 // Number buttons
                 document.querySelectorAll('.button.number').forEach(button => {
                     button.addEventListener('click', () => {
@@ -744,17 +733,20 @@
                     });
                 });
 
-                // Operator buttons
+                // Operator buttons (excluding equals)
                 document.querySelectorAll('.button.operator').forEach(button => {
-                    button.addEventListener('click', () => {
-                        const action = button.getAttribute('data-action');
-
-                        if (action === 'equals') {
-                            calculator.compute();
-                        } else {
+                    const action = button.getAttribute('data-action');
+                    if (action !== 'equals') {
+                        button.addEventListener('click', () => {
                             calculator.chooseOperation(action);
-                        }
-                    });
+                        });
+                    }
+                });
+
+                // Equals button - SEPARATE EVENT LISTENER
+                document.querySelector('.button.equals').addEventListener('click', () => {
+                    console.log('Equals button clicked');
+                    calculator.compute();
                 });
 
                 // Function buttons
@@ -792,21 +784,21 @@
                         button.style.opacity = '0.8';
                         button.style.transition = 'all 0.1s ease';
                         button.style.boxShadow = '0 0 15px rgba(255, 255, 255, 0.3)';
-
+                        
                         if (button.classList.contains('operator') || button.classList.contains('equals')) {
                             button.style.boxShadow = '0 0 20px rgba(0, 114, 255, 0.5)';
                         }
-
+                        
                         button.style.filter = 'brightness(1.2)';
                     });
-
+                    
                     button.addEventListener('mouseup', () => {
                         button.style.transform = 'scale(1)';
                         button.style.opacity = '1';
                         button.style.boxShadow = '';
                         button.style.filter = 'brightness(1)';
                     });
-
+                    
                     button.addEventListener('mouseleave', () => {
                         button.style.transform = 'scale(1)';
                         button.style.opacity = '1';
@@ -820,9 +812,9 @@
 
             // Change graph function based on calculation result
             const originalCompute = calculator.compute;
-            calculator.compute = function () {
+            calculator.compute = function() {
                 originalCompute.call(this);
-
+                
                 // Change graph function based on the result
                 if (this.currentOperand !== 'Error') {
                     const result = parseFloat(this.currentOperand);
@@ -842,5 +834,4 @@
         document.body.style.transition = 'opacity 0.5s ease-in';
     </script>
 </body>
-
 </html>
