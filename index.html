@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samsung-Style Calculator with Math Graph</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #121212 0%, #2d2d2d 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 500px;
+            z-index: 10;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            font-weight: 500;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00c6ff, #0072ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 10px rgba(0, 114, 255, 0.3);
+        }
+
+        .header .subtitle {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .calculator {
+            background: rgba(30, 30, 30, 0.85);
+            border-radius: 24px;
+            padding: 24px 16px;
+            width: 100%;
+            max-width: 360px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow:
+                0 20px 40px rgba(0, 0, 0, 0.6),
+                0 8px 16px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .display {
+            padding: 20px 20px 30px 20px;
+            margin-bottom: 10px;
+            text-align: right;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .previous-operand {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 8px;
+            min-height: 24px;
+            font-weight: 300;
+            word-wrap: break-word;
+            word-break: break-all;
+        }
+
+        .current-operand {
+            font-size: 48px;
+            font-weight: 300;
+            color: #fff;
+            line-height: 1;
+            word-wrap: break-word;
+            word-break: break-all;
+        }
+
+        .buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-gap: 12px;
+        }
+
+        .button {
+            border: none;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 24px;
+            height: 70px;
+            width: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            user-select: none;
+            outline: none;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .button.function {
+            background: #616161;
+            color: #fff;
+        }
+
+        .button.function:hover {
+            background: #757575;
+        }
+
+        .button.function:active {
+            background: #424242;
+        }
+
+        .button.number {
+            background: #424242;
+            color: #fff;
+        }
+
+        .button.number:hover {
+            background: #4d4d4d;
+        }
+
+        .button.number:active {
+            background: #353535;
+        }
+
+        .button.operator {
+            background: #0072ff;
+            color: #fff;
+        }
+
+        .button.operator:hover {
+            background: #1a82ff;
+        }
+
+        .button.operator:active {
+            background: #0062e0;
+        }
+
+        .button.equals {
+            background: #00c6ff;
+            color: #fff;
+        }
+
+        .button.equals:hover {
+            background: #1ad0ff;
+        }
+
+        .button.equals:active {
+            background: #00b0e6;
+        }
+
+        .button:active {
+            transform: scale(0.92);
+        }
+
+        .button.operator,
+        .button.equals {
+            box-shadow: 0 4px 15px rgba(0, 114, 255, 0.3);
+        }
+
+        .button.operator:hover,
+        .button.equals:hover {
+            box-shadow: 0 6px 20px rgba(0, 114, 255, 0.4);
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .container,
+        .calculator,
+        .button {
+            pointer-events: auto;
+        }
+
+        .footer {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-align: center;
+        }
+
+        
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+                max-width: 100%;
+            }
+
+            .calculator {
+                padding: 20px 15px;
+                border-radius: 20px;
+                max-width: 340px;
+            }
+
+            .display {
+                padding: 20px 15px 20px 15px;
+                min-height: 100px;
+            }
+
+            .current-operand {
+                font-size: 42px;
+            }
+
+            .button {
+                height: 65px;
+                width: 65px;
+                font-size: 22px;
+            }
+
+        }
+
+        @media (max-width: 320px) {
+            .button {
+                height: 60px;
+                width: 60px;
+                font-size: 20px;
+            }
+
+            .current-operand {
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="canvas-container"></div>
+
+    <div class="container">
+        <header class="header">
+            <h1>Android-Style Calculator</h1>
+            <p class="subtitle">Built with HTML | CSS | JS <br> ~By Arpita Baghel(RA2411030030048)</p>
+        </header>
+
+        <div class="calculator">
+            <div class="display">
+                <div class="previous-operand" id="previous-operand"></div>
+                <div class="current-operand" id="current-operand">0</div>
+            </div>
+            <div class="buttons-grid">
+                <button class="button function" data-action="clear">AC</button>
+                <button class="button function" data-action="delete">⌫</button>
+                <button class="button function" data-action="percent">%</button>
+                <button class="button operator" data-action="divide">÷</button>
+
+                <button class="button number" data-number="7">7</button>
+                <button class="button number" data-number="8">8</button>
+                <button class="button number" data-number="9">9</button>
+                <button class="button operator" data-action="multiply">×</button>
+
+                <button class="button number" data-number="4">4</button>
+                <button class="button number" data-number="5">5</button>
+                <button class="button number" data-number="6">6</button>
+                <button class="button operator" data-action="subtract">−</button>
+
+                <button class="button number" data-number="1">1</button>
+                <button class="button number" data-number="2">2</button>
+                <button class="button number" data-number="3">3</button>
+                <button class="button operator" data-action="add">+</button>
+
+                <button class="button function" data-action="toggle-sign">+/-</button>
+                <button class="button number zero" data-number="0">0</button>
+                <button class="button number" data-action="decimal">.</button>
+                <button class="button equals" data-action="equals">=</button>
+            </div>
+        </div>
+
+        
+    </div>
+
+    <script>
+        // Three.js - Math Graph Visualization
+        class MathGraph {
+            constructor() {
+                try {
+                    console.log('Initializing Math Graph visualization...');
+
+                    if (typeof THREE === 'undefined') {
+                        console.error('Three.js not loaded!');
+                        return;
+                    }
+
+                    this.scene = new THREE.Scene();
+                    this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                    this.renderer = new THREE.WebGLRenderer({
+                        alpha: true,
+                        antialias: true,
+                        powerPreference: "high-performance"
+                    });
+
+                    this.graph = null;
+                    this.time = 0;
+                    this.mouseX = 0;
+                    this.mouseY = 0;
+                    this.currentFunction = 'sin';
+
+                    this.init();
+                    this.createGraph();
+                    this.animate();
+                    this.handleMouseMove();
+
+                    console.log('Math Graph initialized successfully');
+                } catch (error) {
+                    console.error('Error initializing Math Graph:', error);
+                }
+            }
+
+            init() {
+                const canvasContainer = document.getElementById('canvas-container');
+                if (!canvasContainer) {
+                    console.error('Canvas container not found!');
+                    return;
+                }
+
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.setClearColor(0x000000, 0);
+                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                canvasContainer.appendChild(this.renderer.domElement);
+
+                this.camera.position.z = 15;
+                this.scene.fog = new THREE.Fog(0x000000, 15, 50);
+
+                // Add ambient light
+                const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+                this.scene.add(ambientLight);
+
+                // Add directional light
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                directionalLight.position.set(1, 1, 1);
+                this.scene.add(directionalLight);
+            }
+
+            createGraph() {
+                const geometry = new THREE.BufferGeometry();
+                const vertices = [];
+                const colors = [];
+
+                const gridSize = 20;
+                const step = 0.2;
+
+                // Create grid lines
+                for (let i = -gridSize; i <= gridSize; i++) {
+                    // X-axis lines
+                    vertices.push(-gridSize, 0, i);
+                    vertices.push(gridSize, 0, i);
+
+                    // Z-axis lines
+                    vertices.push(i, 0, -gridSize);
+                    vertices.push(i, 0, gridSize);
+
+                    // Colors for grid lines
+                    const alpha = 0.1;
+                    for (let j = 0; j < 4; j++) {
+                        colors.push(0.2, 0.4, 0.8, alpha);
+                    }
+                }
+
+                // Create function graph
+                const functionVertices = [];
+                const functionColors = [];
+
+                for (let x = -gridSize; x <= gridSize; x += step) {
+                    for (let z = -gridSize; z <= gridSize; z += step) {
+                        const y = this.calculateFunction(x, z);
+
+                        functionVertices.push(x, y, z);
+
+                        // Color based on height and position
+                        const r = 0.2 + Math.abs(x) / gridSize * 0.8;
+                        const g = 0.4 + Math.abs(z) / gridSize * 0.6;
+                        const b = 0.8 + Math.abs(y) / 5 * 0.2;
+
+                        functionColors.push(r, g, b);
+                    }
+                }
+
+                // Add grid to scene
+                const gridGeometry = new THREE.BufferGeometry();
+                gridGeometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+                gridGeometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+
+                const gridMaterial = new THREE.LineBasicMaterial({
+                    vertexColors: true,
+                    transparent: true,
+                    opacity: 0.3
+                });
+
+                const grid = new THREE.LineSegments(gridGeometry, gridMaterial);
+                this.scene.add(grid);
+
+                // Add function graph to scene
+                const functionGeometry = new THREE.BufferGeometry();
+                functionGeometry.setAttribute('position', new THREE.Float32BufferAttribute(functionVertices, 3));
+                functionGeometry.setAttribute('color', new THREE.Float32BufferAttribute(functionColors, 3));
+
+                const functionMaterial = new THREE.PointsMaterial({
+                    size: 0.1,
+                    vertexColors: true,
+                    transparent: true,
+                    opacity: 0.8
+                });
+
+                this.graph = new THREE.Points(functionGeometry, functionMaterial);
+                this.scene.add(this.graph);
+            }
+
+            calculateFunction(x, z) {
+                const timeFactor = this.time * 0.5;
+
+                switch (this.currentFunction) {
+                    case 'sin':
+                        return Math.sin(Math.sqrt(x * x + z * z) + timeFactor) * 2;
+                    case 'cos':
+                        return Math.cos(Math.sqrt(x * x + z * z) + timeFactor) * 2;
+                    case 'wave':
+                        return Math.sin(x + timeFactor) * Math.cos(z + timeFactor) * 2;
+                    case 'ripple':
+                        const distance = Math.sqrt(x * x + z * z);
+                        return Math.sin(distance * 2 - timeFactor * 3) / (distance + 1) * 4;
+                    default:
+                        return Math.sin(Math.sqrt(x * x + z * z) + timeFactor) * 2;
+                }
+            }
+
+            updateGraph() {
+                if (!this.graph) return;
+
+                const positions = this.graph.geometry.attributes.position.array;
+                const colors = this.graph.geometry.attributes.color.array;
+
+                const gridSize = 20;
+                const step = 0.2;
+                let index = 0;
+
+                for (let x = -gridSize; x <= gridSize; x += step) {
+                    for (let z = -gridSize; z <= gridSize; z += step) {
+                        const y = this.calculateFunction(x, z);
+
+                        positions[index * 3] = x;
+                        positions[index * 3 + 1] = y;
+                        positions[index * 3 + 2] = z;
+
+                        // Update colors based on new positions
+                        const r = 0.2 + Math.abs(x) / gridSize * 0.8;
+                        const g = 0.4 + Math.abs(z) / gridSize * 0.6;
+                        const b = 0.8 + Math.abs(y) / 5 * 0.2;
+
+                        colors[index * 3] = r;
+                        colors[index * 3 + 1] = g;
+                        colors[index * 3 + 2] = b;
+
+                        index++;
+                    }
+                }
+
+                this.graph.geometry.attributes.position.needsUpdate = true;
+                this.graph.geometry.attributes.color.needsUpdate = true;
+            }
+
+            handleMouseMove() {
+                document.addEventListener('mousemove', (event) => {
+                    this.mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+                    this.mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+                });
+
+                document.addEventListener('touchmove', (event) => {
+                    if (event.touches.length > 0) {
+                        this.mouseX = (event.touches[0].clientX / window.innerWidth) * 2 - 1;
+                        this.mouseY = -(event.touches[0].clientY / window.innerHeight) * 2 + 1;
+                    }
+                    event.preventDefault();
+                });
+            }
+
+            animate() {
+                if (!this.renderer) return;
+
+                requestAnimationFrame(() => this.animate());
+
+                this.time += 0.016; // ~60fps
+
+                // Update graph based on current function
+                this.updateGraph();
+
+                // Rotate graph slowly
+                if (this.graph) {
+                    this.graph.rotation.y = this.time * 0.05;
+                }
+
+                // Camera follows mouse slightly
+                this.camera.position.x += (this.mouseX * 2 - this.camera.position.x) * 0.02;
+                this.camera.position.y += (this.mouseY * 2 - this.camera.position.y) * 0.02;
+                this.camera.lookAt(this.scene.position);
+
+                this.renderer.render(this.scene, this.camera);
+            }
+
+            onWindowResize() {
+                this.camera.aspect = window.innerWidth / window.innerHeight;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+
+            changeFunction(func) {
+                this.currentFunction = func;
+            }
+        }
+
+        // Enhanced Calculator Logic
+        class Calculator {
+            constructor(previousOperandElement, currentOperandElement) {
+                this.previousOperandElement = previousOperandElement;
+                this.currentOperandElement = currentOperandElement;
+                this.clear();
+            }
+
+            clear() {
+                this.currentOperand = '0';
+                this.previousOperand = '';
+                this.operation = undefined;
+                this.shouldResetScreen = false;
+                this.clearButtonText = 'AC';
+                this.updateDisplay();
+            }
+
+            delete() {
+                if (this.currentOperand.length === 1) {
+                    this.currentOperand = '0';
+                } else {
+                    this.currentOperand = this.currentOperand.slice(0, -1);
+                }
+                this.updateDisplay();
+            }
+
+            appendNumber(number) {
+                if (this.currentOperand === '0' || this.shouldResetScreen) {
+                    this.currentOperand = number;
+                    this.shouldResetScreen = false;
+                } else {
+                    this.currentOperand += number;
+                }
+                this.clearButtonText = 'C';
+                this.updateDisplay();
+            }
+
+            chooseOperation(operation) {
+                if (this.currentOperand === '') return;
+
+                if (this.previousOperand !== '') {
+                    this.previousOperand += ` ${this.currentOperand} ${this.getOperationSymbol(operation)}`;
+                } else {
+                    this.previousOperand = `${this.currentOperand} ${this.getOperationSymbol(operation)}`;
+                }
+
+                this.operation = operation;
+                this.currentOperand = '';
+                this.updateDisplay();
+            }
+
+            getOperationSymbol(operation) {
+                switch (operation) {
+                    case 'add': return '+';
+                    case 'subtract': return '−';
+                    case 'multiply': return '×';
+                    case 'divide': return '÷';
+                    default: return '';
+                }
+            }
+
+            compute() {
+                try {
+                    let expression = this.previousOperand;
+                    if (this.currentOperand !== '') {
+                        expression += ` ${this.currentOperand}`;
+                    }
+
+                    if (!expression) return;
+
+                    expression = expression.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-');
+
+                    const result = Function('"use strict";return (' + expression + ')')();
+
+                    const displayExpression = this.previousOperand + (this.currentOperand !== '' ? ` ${this.currentOperand}` : '');
+
+                    this.currentOperand = result.toString();
+                    this.previousOperand = displayExpression;
+                    this.shouldResetScreen = true;
+                    this.clearButtonText = 'AC';
+                    this.updateDisplay();
+                } catch {
+                    this.currentOperand = 'Error';
+                    this.previousOperand = '';
+                    this.updateDisplay();
+                }
+            }
+
+            toggleSign() {
+                this.currentOperand = (parseFloat(this.currentOperand) * -1).toString();
+                this.updateDisplay();
+            }
+
+            calculatePercentage() {
+                this.currentOperand = (parseFloat(this.currentOperand) / 100).toString();
+                this.updateDisplay();
+            }
+
+            addDecimal() {
+                if (this.shouldResetScreen) {
+                    this.currentOperand = '0.';
+                    this.shouldResetScreen = false;
+                } else if (!this.currentOperand.includes('.')) {
+                    this.currentOperand += '.';
+                }
+                this.updateDisplay();
+            }
+
+            formatDisplayNumber(number) {
+                const stringNumber = number.toString();
+                const integerDigits = parseFloat(stringNumber.split('.')[0]);
+                const decimalDigits = stringNumber.split('.')[1];
+                let integerDisplay;
+
+                if (isNaN(integerDigits)) {
+                    integerDisplay = '';
+                } else {
+                    integerDisplay = integerDigits.toLocaleString('en', { maximumFractionDigits: 0 });
+                }
+
+                if (decimalDigits != null) {
+                    return `${integerDisplay}.${decimalDigits}`;
+                } else {
+                    return integerDisplay;
+                }
+            }
+
+            updateDisplay() {
+                this.currentOperandElement.innerText = this.formatDisplayNumber(this.currentOperand);
+                this.previousOperandElement.innerText = this.previousOperand;
+
+                const clearButton = document.querySelector('[data-action="clear"]');
+                if (clearButton) {
+                    clearButton.textContent = this.clearButtonText;
+                }
+            }
+
+            handleKeyboardInput(key) {
+                if (/[0-9]/.test(key)) {
+                    this.appendNumber(key);
+                } else if (key === '.') {
+                    this.addDecimal();
+                } else if (key === '+') {
+                    this.chooseOperation('add');
+                } else if (key === '-') {
+                    this.chooseOperation('subtract');
+                } else if (key === '*' || key === 'x') {
+                    this.chooseOperation('multiply');
+                } else if (key === '/') {
+                    this.chooseOperation('divide');
+                } else if (key === 'Enter' || key === '=') {
+                    this.compute();
+                } else if (key === 'Escape' || key === 'Delete') {
+                    this.clear();
+                } else if (key === 'Backspace') {
+                    this.delete();
+                } else if (key === '%') {
+                    this.calculatePercentage();
+                } else {
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        // Main Application
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM loaded - initializing app');
+
+            // Initialize Math Graph
+            const mathGraph = new MathGraph();
+            window.addEventListener('resize', () => {
+                mathGraph.onWindowResize();
+            });
+
+            // Initialize calculator
+            const previousOperandElement = document.getElementById('previous-operand');
+            const currentOperandElement = document.getElementById('current-operand');
+
+            if (!previousOperandElement || !currentOperandElement) {
+                console.error('Calculator elements not found!');
+                return;
+            }
+
+            const calculator = new Calculator(previousOperandElement, currentOperandElement);
+
+            // Button event listeners
+            function setupEventListeners() {
+                console.log('Setting up event listeners');
+
+                // Number buttons
+                document.querySelectorAll('.button.number').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const number = button.getAttribute('data-number');
+                        if (number !== null) {
+                            calculator.appendNumber(number);
+                        }
+                    });
+                });
+
+                // Operator buttons
+                document.querySelectorAll('.button.operator').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const action = button.getAttribute('data-action');
+
+                        if (action === 'equals') {
+                            calculator.compute();
+                        } else {
+                            calculator.chooseOperation(action);
+                        }
+                    });
+                });
+
+                // Function buttons
+                document.querySelector('.button[data-action="clear"]').addEventListener('click', () => {
+                    calculator.clear();
+                });
+
+                document.querySelector('.button[data-action="delete"]').addEventListener('click', () => {
+                    calculator.delete();
+                });
+
+                document.querySelector('.button[data-action="toggle-sign"]').addEventListener('click', () => {
+                    calculator.toggleSign();
+                });
+
+                document.querySelector('.button[data-action="percent"]').addEventListener('click', () => {
+                    calculator.calculatePercentage();
+                });
+
+                document.querySelector('.button[data-action="decimal"]').addEventListener('click', () => {
+                    calculator.addDecimal();
+                });
+
+                // Keyboard support
+                document.addEventListener('keydown', (event) => {
+                    if (calculator.handleKeyboardInput(event.key)) {
+                        event.preventDefault();
+                    }
+                });
+
+                // Button press effects
+                document.querySelectorAll('.button').forEach(button => {
+                    button.addEventListener('mousedown', () => {
+                        button.style.transform = 'scale(0.92)';
+                        button.style.opacity = '0.8';
+                        button.style.transition = 'all 0.1s ease';
+                        button.style.boxShadow = '0 0 15px rgba(255, 255, 255, 0.3)';
+
+                        if (button.classList.contains('operator') || button.classList.contains('equals')) {
+                            button.style.boxShadow = '0 0 20px rgba(0, 114, 255, 0.5)';
+                        }
+
+                        button.style.filter = 'brightness(1.2)';
+                    });
+
+                    button.addEventListener('mouseup', () => {
+                        button.style.transform = 'scale(1)';
+                        button.style.opacity = '1';
+                        button.style.boxShadow = '';
+                        button.style.filter = 'brightness(1)';
+                    });
+
+                    button.addEventListener('mouseleave', () => {
+                        button.style.transform = 'scale(1)';
+                        button.style.opacity = '1';
+                        button.style.boxShadow = '';
+                        button.style.filter = 'brightness(1)';
+                    });
+                });
+            }
+
+            setupEventListeners();
+
+            // Change graph function based on calculation result
+            const originalCompute = calculator.compute;
+            calculator.compute = function () {
+                originalCompute.call(this);
+
+                // Change graph function based on the result
+                if (this.currentOperand !== 'Error') {
+                    const result = parseFloat(this.currentOperand);
+                    const functions = ['sin', 'cos', 'wave', 'ripple'];
+                    const index = Math.abs(Math.floor(result)) % functions.length;
+                    mathGraph.changeFunction(functions[index]);
+                }
+            };
+
+            // Smooth loading
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+            }, 100);
+        });
+
+        document.body.style.opacity = '0';
+        document.body.style.transition = 'opacity 0.5s ease-in';
+    </script>
+</body>
+
+</html>
