@@ -28,7 +28,7 @@ GitHub Repository: https://github.com/ArpitaBaghel810/Calculator-GUI.git
 
 Developer: Arpita Baghel
 
-Student ID: RA2411030030034
+Student ID: RA2411030030048
 
 🛠️ Technologies Used
 HTML5 - Structure and semantics
@@ -186,6 +186,6 @@ Android design guidelines for UI inspiration
 📞 Support
 If you have any questions or issues, please open an issue on GitHub.
 
-Built with ❤️ by Arpita Baghel (RA2411030030034)
+Built with ❤️ by Arpita Baghel (RA2411030030048)
 
 Deployed effortlessly on Vercel
